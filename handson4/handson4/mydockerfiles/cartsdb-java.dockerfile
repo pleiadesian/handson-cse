@@ -7,6 +7,6 @@ RUN apt-get update \
 
 COPY ./target/zkpwatcher.jar app.jar
 COPY ./target/start-mongo.sh start.sh
-RUN chown -R root:root /app.jar
+RUN chown -R root:root app.jar
 RUN chmod +x start.sh
-ENTRYPOINT /start.sh "carts-db"
+ENTRYPOINT ./start.sh "carts-db"

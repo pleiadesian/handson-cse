@@ -4,5 +4,9 @@ Question 1: What's relationship between Apache Zookeeper and paxos protocol?
 	（1）Zookeeper使用了Zab算法，是Primary/Backup model。而paxos协议针对的是Replicated state machines设计的。
 	（2）Zookeeper中同一时间最多有1个promoter，新的leader的选举需要一个同步的阶段。paxos协议允许同时存在多个promoter。
 
+
 Question 2: Many databases or file systems also provide distributed replication support. However, many real-world applications choose Zookeeper for configurations management. Why? What feature of Zookeeper makes it an excellent choice for configuration management?
 数据库和文件系统的分布式复制集可以保证数据库服务和文件系统服务的可用性，并且提高性能。对分布式数据库和文件系统修改配置需要将每个节点的配置文件逐一修改，维护开销大。如果各个节点要实时获得集群最新的配置，每个节点需要对整个集群进行不断扫描，对每个节点造成很大的压力。使用Zookeeper统一管理配置文件，可以减少维护的开销。通过Zookeeper的发布订阅机制使得集群中的各个节点监听其数据修改，可以保证每个节点实时获得集群最新的配置。Zookeeper的Zab算法保证了Zookeeper集群的可用性。
+
+
+Question 3: Please implement the naming service by yourself. You need to submit your source codes and all extended docker files in the final answer package and briefly describe your implementation in the document.
