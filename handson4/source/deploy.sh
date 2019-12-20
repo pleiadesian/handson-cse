@@ -11,5 +11,5 @@ sudo docker run --rm --name user-db --network handson4 -d userdb-java
 sudo docker run --rm --name user --network handson4 -e MONGO_HOST=user-db:27017 -d user-java
 sudo docker run --rm --name shipping --network handson4 -d shipping-java
 sudo docker run --rm --name payment --network handson4 -d payment-java
-sudo docker run --rm --name frontend --network handson4 -e SESSION_REDIS=true -p 30000:8079 -d frontend-java
+sudo docker run --rm --name frontend --network handson4 -p 30000:8079 -d frontend-java
 
