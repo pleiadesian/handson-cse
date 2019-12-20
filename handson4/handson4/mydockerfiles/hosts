@@ -1,5 +1,0 @@
-# origin DNS
-172.26.0.3 catalogue
-10.162.34.210 testargs
-172.26.0.2 catalogue-db
-172.26.0.4 orders-db

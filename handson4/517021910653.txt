@@ -10,3 +10,8 @@ Question 2: Many databases or file systems also provide distributed replication 
 
 
 Question 3: Please implement the naming service by yourself. You need to submit your source codes and all extended docker files in the final answer package and briefly describe your implementation in the document.
+Zookeeper watcher的实现：源码在/zkpwatcher目录下。使用了java的ZkClient库。Zookeeper watcher进程连接上Zookeeper后，将自己所在容器的域名和IP地址写入Zookeeper的/hosts的节点下的对应域名的子节点中，如果同名子节点存在则更新该子节点。订阅/hosts节点的子节点变更，每当/hosts有新的节点加入，则订阅新节点的数据变更。订阅所有/hosts的子节点的数据变更，每当有新数据写入节点，则更新到本地的/etc/hosts中。
+Dockerfile： 扩展的dockerfile在/mydockerfile目录下。所有容器继承handson3中的容器。所有容器的入口是一个shell脚本。shell脚本先在后台启动Zookeeper watcher进程，再启动原来容器的入口进程。
+
+Question 4: Please partition the database according to the previous description and briefly introduct your solution.
+启动三个mongo容器，域名分别为orders-db、carts-db、user-db，在容器启动时后台跑一个Zookeeper watcher进程，将自己的域名和IP地址注册到Zookeeper集群中。orders、carts、user容器的watcher可以在Zookeeper获取对应数据库的IP地址。
