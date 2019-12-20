@@ -1,11 +1,11 @@
-FROM weaveworksdemos/catalogue:0.3.5
+FROM weaveworksdemos/shipping:0.4.8
 
 USER root
 
 RUN apk update \
      && apk add openjdk8-jre
 COPY ./target/zkpwatcher.jar app.jar
-COPY ./target/start.sh start.sh
+COPY ./target/start-java.sh start.sh
 RUN chown -R root:root /app.jar
 RUN chmod +x start.sh
-ENTRYPOINT /start.sh "catalogue"
+ENTRYPOINT /start.sh "shipping"
