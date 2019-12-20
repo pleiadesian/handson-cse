@@ -1,0 +1,19 @@
+Use your own word to describe “end-to-end” argument.
+"End-to-end" argument是一个设计原则，根据应用场景，在低层的子系统实现功能和高层的应用中实现功能之间做出权衡。使用同一子系统的不同应用对同一个功能有需求，则由子系统进行功能的提供，减少了应用层各自实现该功能的开销；对于应用层已经实现的功能，子系统不应该重复的实现相同的功能导致性能上的开销；使用同一子系统的不同应用对一个功能有不同的需求，可以由子系统提供功能，由应用根据需求进行替换。
+
+Give at lease three cases that are suitable to use this principle.
+1. 分布式事务处理系统的事务层和存储层：若事务层提供了对数据读写的冲突检测和版本控制的保证，存储层不需要采用额外的冲突检测和版本控制的机制。
+2. 微内核：线程管理、内存管理和进程间通信等模块运行在内核空间；文件系统、设备驱动器其他模块运行在用户空间。
+3. 软件架构中的经典三层架构：用户界面层、业务逻辑层和数据访问层。不同的业务逻辑可以访问相同的数据访问类。在数据访问层添加缓存等功能可以提高访问数据的效率。
+
+Give at lease three cases that are NOT suitable to use this principle.
+1. 汽车上的保险措施
+2. 在电力系统中的线路双重保护
+3. 银行系统采用了多重的验证和冗余的备份
+
+[Discussion] Consider the design of the file system based on inode (as we learn from class and the lab ). Which part(s) of the design do you think can be removed? In another word, which part(s) of the design is(are) not flexible enough and should be implemented by the user? (Hint: don’t be limited by the FS API.)
+在file name layer，从file name到inode number的映射方式我认为可以由用户进行实现。例如，对于经常需要在大目录下查找指定文件的用户，可以用hash table的方式实现该层，提高查找效率。
+
+
+[Discussion] The same question, for the OS.
+我认为进程管理可以由子系统提供，并可以由用户在实现上进行替换。对于IPC性能要求高、安全性要求低的用户，可以将不同进程放在同一个虚拟地址空间下，提高IPC的效率。

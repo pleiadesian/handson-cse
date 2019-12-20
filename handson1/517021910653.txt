@@ -1,0 +1,21 @@
+Question 1: Please briefly answer the role of DNS in your own words.
+DNS存储并维护网络资源的位置数据，提供从域名到IP地址的映射。
+
+Question 2: The type field have a few different values to indicate the kind of this record. What do "A", "NS" and "CNAME" mean?
+“A”记录类型表示域名映射到一个IP地址；“NS”记录类型表示域名映射到一个存有真正的DNS记录的服务器地址；“CNAME”记录类型表示域名映射到另一个域名。
+
+Question 3: How can we ask a specific dns server (instead of the default) for information about a domain name? When I use "dig www.baidu.com",the DNS server is 192.168.110.2. However if this server crashed and I have to ask the server 8.8.8.8, what command should I use?
+%dig @8.8.8.8 www.baidu.com
+
+Question 4: Do you know the process of solving domain name "lirone.csail.mit.edu"? You need to go through the steps of resolving a particular hostname, mimicing a standard recursive query. Assuming it knows nothing else about a name, a DNS resolver will ask a well-known root server. The root servers on the Internet are in the domain root-servers.net. You can use "%dig . ns" to get the list of 13 root servers.You can show us the result of each step or briefly introduce your idea.[Hint: you should start from "edu"]
+1. 发送请求到h.root-servers.net，获得edu.所对应的记录
+2. 发送请求到e.edu-servers.net，获得mit.edu.所对应的记录
+3. 发送请求到eur5.akam.net，获得csail.mit.edu.所对应的记录
+4. 发送请求到auth-ns1.csail.mit.edu，获得lirone.csail.mit.edu.所对应的记录
+5. 在获得的记录中选择一条作为lirone.csail.mit.edu的IP地址
+
+Question 5: Please explain the above phenomenon. Have a guess!
+对www.twitter.com的查询请求被伪装成根服务器的解析服务器检测到。伪装的解析服务器直接返回www.twitter.com的“A”类型记录，映射到一条无效的IP地址。
+
+Question 6: The ips which dig returns to you belong to google indeed. Give the reason for the above phenomenon.
+对www.google.com的查询请求被伪装的解析服务器检测并返回一条属于google的但不运行web server的IP地址，因此无法通过此IP访问google网页。

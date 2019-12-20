@@ -1,0 +1,18 @@
+1. According to the lockset algorithm, when does eraser signal a data race? Why is this condition chosen?
+对于每一个共享变量v，当v的候选锁集合C(v)在运行过程中变为空集，Eraser就会报告一个数据冲突。
+设最后一次访问v时，线程持有的锁集合为locks_helds1，上一次访问v时，线程持有的锁的集合为locks_helds2。可知locks_helds1和locks_helds2的交集为空集。这意味着两个不同的线程可以分别持有locks_helds1中的锁和locks_helds2中的锁同时访问v，导致数据冲突。
+
+2. Under what conditions does Eraser report a false positive? What conditions does it produce false negatives?
+False positive:
+	(1) 同一内存地址被不同对象使用。这种情况发生在程序员自己实现的分配和回收内存的逻辑中。由于它们没有使用C/C++/Unix内存分配接口，而是直接调用OS接口，Eraser将无法检测到这种逻辑下内存的分配和回收，对于不同的对象仍然使用相同的lockset index。
+	（2）由程序员自己实现的锁。没有使用pthread接口的锁的逻辑无法被Eraser检测到，Eraser会错误的判断共享变量没有加锁时被多个线程访问。
+	（3）不会导致程序出错的访问冲突。
+
+False negative：
+	有些程序使用多个锁保护同一个共享变量v。当线程写v时，需要获取该对象对应的所有锁；当线程读v时，需要获取该对象对应的锁的其中之一。如果对这个程序使用使用原有的lockset算法，则会出现false positive。将lockset算法修改为读对象v时不修改C(v)，写对象v时将C(v)和locks_helds(t)取交集，则可以避免该类程序的false positive。但是这种情况下会出现false negative。当多个线程对于共享对象v错误的拿读锁，没有任何一次拿写锁时，Eraser不会汇报访问冲突。
+
+3. Typically, instrumenting a program changes the intra-thread timing (the paper calls it interleaving). This can cause bugs to disappear when you start trying to find them. What aspect of the Eraser design mitigates this problem?
+Eraser通过判断线程在访问变量时是否正确的持有锁，代替了Happens-before关系中基于线程的执行顺序判断数据冲突。即使多个线程存在不同调度，Eraser在程序运行过程中会对每个共享变量v维护一个状态，如果v违背了锁的规则，则最终会在状态机上进入到数据冲突的状态并发出警告。这使得数据冲突的检测和线程的调度不相互影响，因此在程序中插入检测的代码不会影响数据冲突的检测。同时，这使得Eraser只支持用简单的锁规则进行分析，无法对使用了其他同步原语的程序进行分析。
+
+4. Please raise at least one question of your own for the discussion.
+对于使用其他同步原语保证不发生数据冲突的程序，是否也可以用类似于lockset的算法对其进行动态数据冲突检测？

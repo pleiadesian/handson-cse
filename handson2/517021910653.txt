@@ -1,0 +1,37 @@
+Question 1: Wal-sys displays the current state of the database contents after you type show_state. Why doesn't the database show studentB?
+Write-Ahead Log系统中，写入log发生在实际数据写入之前。在action 2中，studentB创建账户的操作被写入LOG中，但是这个action没有commit和end，因此studentB的数据没有被写入non-volatile memory即DB文件中。
+
+Question 2: When the database recovers, which accounts should be active, and what values should they contain?
+studentA和studentC的账户是有效的，studentA value=900，studentC value=3100
+
+Question 3: Can you explain why the "DB" file does not contain a record for studentC and contains the pre-debit balance for studentA?
+在将commit写入log后，end写入log前，系统不保证数据已经被写入DB，只保证在crash recovery的时候进行redo，根据log将action 3的所有操作写入DB中。
+
+Question 4: What do you expect the state of "DB" to be after wal-sys recovers? Why?
+Account: studentA value:900
+Account: studentC value:3100
+Action1已经将end写入log，数据已经持久化到DB文件中。Action3已经将commit写入log，但还没有将end写入log，恢复时对其进行redo。Action2没有将commit写入log，恢复时不对其进行redo。
+
+Question 5: Run wal-sys again to recover the database. Examine the "DB" file. Does the state of the database match your expectations? Why or why not?
+与预期相同，恢复时rollback，将action1标记为Done，action2标记为losers，action3标记为winners。forward scan时对action3的操作进行redo。
+
+Question 6: During recovery, wal-sys reports the action_ids of those recoverable actions that are "Losers", "Winners", and "Done". What is the meaning of these categories?
+Losers：已经开始的动作没有commit，不对其操作进行redo
+Winners：已经开始的动作已经commit，还没有end，在恢复时需要对其操作进行redo，并在log中写入end
+Done：动作已经结束，所有操作都持久化到DB文件中，恢复时不需要undo或者redo
+
+Question 7: Why are the results of recoverable action 2's create_account 2 studentB 2000 command not installed in "DB" by the checkpoint command on the following line?
+写入checkpoint不保证数据被写入到DB。
+
+Question 8: How many lines were rolled back? What is the advantage of using checkpoints?
+回滚了6行。Checkpoint用于记录各个action的状态，在恢复时往前扫描到checkpoint时就可以得知checkpoint之前的所有loser，减小扫描全部log进行undo的开销。
+
+
+Question 9: Does the second run of the recovery procedure (for sequence 2) restore "DB" to the same state as the first run? What is this property called?
+Yes. Durability.
+
+Question 10: Compare the action_ids of "Winners", "Losers", and "Done" from the second recovery with those from the first. The lists are different. How does the recovery procedure guarantee the property from Question 9 even though the recovery procedure can change? (Hint: Examine the "LOG" file).
+第一次恢复时，需要redo的动作完成redo后会在log中写入end。第二次恢复时会认为该动作已经完成，不对其进行redo或者undo。
+
+Question 11 (Optional): Wal-sys has a hitherto unmentioned option: if you type wal-sys -undo it will perform undo logging and undo recovery. Try the above sequences again with undo logging to see what changes.
+使用rollback recovery，在COMMIT之前可能有操作已经写入DB，在恢复时对loser进行undo，并在LOG后添加abort。
